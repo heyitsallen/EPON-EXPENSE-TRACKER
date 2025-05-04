@@ -37,7 +37,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('trackers', TrackerController::class)->except(['show']);
 
     // Dashboard view specific to tracker
-    Route::get('/trackers/{tracker}/dashboard', [TrackerController::class, 'showDashboard'])->name('trackers.dashboard'); // This is a tracker-specific dashboard
+    Route::get('/trackers/{tracker}/dashboard', [ExpenseController::class, 'showDashboard'])->name('trackers.dashboard'); // This is a tracker-specific dashboard
+    Route::get('/tracker/{trackerId}/dashboard', [ExpenseController::class, 'showDashboard'])->name('dashboard.show');
 
     // Tracker access management
     Route::post('/trackers/{tracker}/share', [TrackerController::class, 'share'])->name('trackers.share');

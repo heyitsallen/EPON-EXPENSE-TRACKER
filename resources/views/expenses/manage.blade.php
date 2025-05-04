@@ -19,22 +19,10 @@
                             <option value="expense">Expense</option>
                             <option value="income">Income</option>
                         </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select name="category_id" class="form-select" id="categorySelect">
-                            <option value="">No Category</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                            @endforeach
-                            <option value="new">+ Add New Category</option>
-                        </select>
-                        
-                    </div>
-                    
+                    </div>               
                     <div class="col-md-3" id="newCategoryDiv" style="display: none;">
                         <input type="text" name="new_category" id="newCategoryInput" class="form-control" placeholder="Enter new category name">
-                    </div>
-                    
+                    </div>           
                     <div class="col-md-2">
                         <input type="number" name="amount" class="form-control" placeholder="Amount" step="0.01" required>
                     </div>
@@ -65,16 +53,8 @@
                                 <small>{{ \Carbon\Carbon::parse($expense->date)->toFormattedDateString() }}</small>
                                 @if($expense->attachment_path)
                                     <br>
-                                    <a href="{{ asset('storage/' . $expense->attachment_path) }}" target="_blank">View Attachment</a>
+                                    <a href="{{ asset('storage/' . $expense->attachment_path) }}" target="_blank">View Receipt</a>
                                 @endif
-                            </div>
-                            <div class="col-md-2" id="categoryField">
-                                <select name="category_id" class="form-select">
-                                    <option value="" disabled selected>Select Category</option>
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
                             </div>
                             <div>
                                 {{-- Edit Form (inline) --}}

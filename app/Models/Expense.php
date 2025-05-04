@@ -19,7 +19,7 @@ class Expense extends Model
 
     public function category()
     {
-        return $this->belongsTo(ExpenseCategory::class, 'category_id');  // Assuming category_id exists in expenses table
+        return $this->belongsTo(ExpenseCategory::class, 'category_id');  
     }
     
 }

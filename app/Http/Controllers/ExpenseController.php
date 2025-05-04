@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Tracker;
 use App\Models\User;
@@ -12,6 +13,71 @@ use App\Models\ExpenseCategory;
 class ExpenseController extends Controller
 {
 
+    public function showDashboard($trackerId)
+    {
+        $tracker = Tracker::with(['expenses', 'incomes'])->findOrFail($trackerId);
+    
+        $owner = $tracker->users()->wherePivot('position', 'owner')->first();
+    
+        // Grouped Income and Expenses by date (Y-m-d)
+        $incomesGrouped = $tracker->incomes()->orderBy('date')->get()->groupBy(function($item) {
+            return Carbon::parse($item->date)->format('Y-m-d');
+        });
+    
+        $expensesGrouped = $tracker->expenses()->orderBy('date')->get()->groupBy(function($item) {
+            return Carbon::parse($item->date)->format('Y-m-d');
+        });
+    
+        // Monthly/Yearly Totals
+        $totalMonthlyIncome = $tracker->incomes()->whereMonth('date', now()->month)->sum('amount');
+        $totalYearlyIncome = $tracker->incomes()->whereYear('date', now()->year)->sum('amount');
+    
+        $totalMonthlyExpenses = $tracker->expenses()->whereMonth('date', now()->month)->sum('amount');
+        $totalYearlyExpenses = $tracker->expenses()->whereYear('date', now()->year)->sum('amount');
+    
+        // Labels: January to December
+        $months = collect(range(1, 12))->map(function ($m) {
+            return Carbon::create()->month($m)->format('F');
+        });
+    
+        // Monthly Income/Expense Totals
+        $monthlyIncomeData = $months->map(function ($monthName, $index) use ($tracker) {
+            return $tracker->incomes()
+                ->whereMonth('date', $index + 1)
+                ->whereYear('date', now()->year)
+                ->sum('amount');
+        });
+    
+        $monthlyExpenseData = $months->map(function ($monthName, $index) use ($tracker) {
+            return $tracker->expenses()
+                ->whereMonth('date', $index + 1)
+                ->whereYear('date', now()->year)
+                ->sum('amount');
+        });
+    
+        // Pie chart data: Top 5 expense descriptions
+        $topDescriptions = $tracker->expenses()
+            ->selectRaw('description, SUM(amount) as total')
+            ->groupBy('description')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
+    
+        return view('trackers.dashboard', compact(
+            'tracker',
+            'owner',
+            'incomesGrouped',
+            'expensesGrouped',
+            'totalMonthlyIncome',
+            'totalYearlyIncome',
+            'totalMonthlyExpenses',
+            'totalYearlyExpenses',
+            'months',
+            'monthlyIncomeData',
+            'monthlyExpenseData',
+            'topDescriptions'
+        ));
+    }
     public function store(Request $request)
     {
         // Validate incoming data
